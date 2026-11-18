@@ -41,6 +41,7 @@ extension MoodX on Mood {
         Mood.sedih => const Color(0xFF6C9BEA),
         Mood.cemas => const Color(0xFFB59DEB),
       };
+  String get asset => 'assets/images/moods/$name.png';    
 }
 
 class MoodEntry {
@@ -48,8 +49,10 @@ class MoodEntry {
   final DateTime time;
   final String note;
   const MoodEntry({required this.mood, required this.time, required this.note});
-}
 
+String get timeLabel =>
+    '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+}
 // ─────────────────────────────────────────────
 // 2. HOME PAGE
 // ─────────────────────────────────────────────
@@ -58,9 +61,26 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: ganti dengan data asli (state management / database)
-    final today = <MoodEntry>[];
-    final yesterday = <MoodEntry>[];
+    final now = DateTime.now();
+final yesterdayDate = now.subtract(const Duration(days: 1));
+
+DateTime at(DateTime day, int h, int m) =>
+    DateTime(day.year, day.month, day.day, h, m);
+
+bool sameDay(DateTime a, DateTime b) =>
+    a.year == b.year && a.month == b.month && a.day == b.day;
+
+// TODO: ganti dengan data asli (state management / database)
+final entries = [
+  MoodEntry(mood: Mood.bersemangat, time: at(now, 14, 20), note: 'Dapat kabar baik dari klien'),
+  MoodEntry(mood: Mood.tenang, time: at(now, 11, 0), note: 'Meditasi pagi terasa menenangkan'),
+  MoodEntry(mood: Mood.senang, time: at(now, 8, 30), note: 'Pagi yang cerah dan menyenangkan'),
+  MoodEntry(mood: Mood.sedih, time: at(yesterdayDate, 20, 15), note: 'Kangen rumah tiba-tiba'),
+  MoodEntry(mood: Mood.cemas, time: at(yesterdayDate, 9, 0), note: 'Deadline bikin deg-degan'),
+];
+
+final today = entries.where((e) => sameDay(e.time, now)).toList();
+final yesterday = entries.where((e) => sameDay(e.time, yesterdayDate)).toList();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
@@ -107,9 +127,13 @@ class _Header extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Halo, $name 👋'), // TODO: style bold
+              Text(
+                'Halo, $name 👋', 
+              style: const TextStyle(fontSize: 24,fontWeight: FontWeight.w600,color: Color(0xFF1A1A2E),
+              )
+              ),  
               const SizedBox(height: 4),
-              const Text('Bagaimana perasaanmu hari ini?'), // TODO: style abu-abu
+              const Text('Bagaimana perasaanmu hari ini?',style: TextStyle(fontSize: 16, color: Color(0xFF6B7280))),
             ],
           ),
         ),
@@ -183,7 +207,7 @@ class _MoodCard extends StatelessWidget {
                 Text(entry.mood.label),
                 const SizedBox(height: 4),
                 Text(
-                  '${entry.time.hour}:${entry.time.minute} · ${entry.note}',
+                  '${entry.time.hour} · ${entry.note}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -207,15 +231,6 @@ class _MoodIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 70,
-      height: 70,
-      decoration: BoxDecoration(
-        color: mood.color,
-        borderRadius: BorderRadius.circular(22),
-      ),
-      // TODO: ganti dengan SvgPicture / Image.asset wajah per mood
-      child: const Icon(Icons.emoji_emotions_outlined, color: Colors.white),
-    );
+    return Image.asset(mood.asset, width: 70, height: 70);
   }
 }
