@@ -1,5 +1,25 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:google_fonts/google_fonts.dart';
 
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Mood Tracker',
+      theme: ThemeData(
+        textTheme: GoogleFonts.poppinsTextTheme(),
+      ),
+      home: const HomePage(),
+    );
+  }
+}
 // ─────────────────────────────────────────────
 // 1. MODEL (nanti dipindah ke models/mood_entry.dart)
 // ─────────────────────────────────────────────
@@ -54,7 +74,7 @@ class HomePage extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           children: [
-            const _Header(name: 'Zika'),
+            const _Header(name: 'Hanun'),
             const SizedBox(height: 24),
             const _StreakChip(days: 5),
             const SizedBox(height: 28),
