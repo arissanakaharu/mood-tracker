@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mood_tracker_app/pages/add_edit_mood_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -20,10 +21,10 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-// ─────────────────────────────────────────────
+
 // 1. MODEL (nanti dipindah ke models/mood_entry.dart)
-// ─────────────────────────────────────────────
-enum Mood { bersemangat, tenang, senang, sedih, cemas }
+
+enum Mood { bersemangat, tenang, senang, sedih, cemas, marah }
 
 extension MoodX on Mood {
   String get label => switch (this) {
@@ -32,6 +33,7 @@ extension MoodX on Mood {
         Mood.senang => 'Senang',
         Mood.sedih => 'Sedih',
         Mood.cemas => 'Cemas',
+        Mood.marah => 'Marah'
       };
 
   Color get color => switch (this) {
@@ -40,6 +42,7 @@ extension MoodX on Mood {
         Mood.senang => const Color(0xFFF6C25B),
         Mood.sedih => const Color(0xFF6C9BEA),
         Mood.cemas => const Color(0xFFB59DEB),
+        Mood.marah => const Color(0xFFEB7566)
       };
   String get asset => 'assets/images/moods/$name.png';    
 }
@@ -53,9 +56,9 @@ class MoodEntry {
 String get timeLabel =>
     '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
 }
-// ─────────────────────────────────────────────
+
 // 2. HOME PAGE
-// ─────────────────────────────────────────────
+
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
@@ -85,7 +88,10 @@ final yesterday = entries.where((e) => sameDay(e.time, yesterdayDate)).toList();
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {}, // TODO: navigasi ke halaman tambah mood
+        onPressed: () => Navigator.push(
+          context, 
+          MaterialPageRoute(builder: (_)=> const AddEditMoodPage()),
+        ),
         backgroundColor: const Color(0xFF4B36B8),
         shape: const CircleBorder(),
         child: const Icon(Icons.add, color: Colors.white),
@@ -110,11 +116,9 @@ final yesterday = entries.where((e) => sameDay(e.time, yesterdayDate)).toList();
   }
 }
 
-// ─────────────────────────────────────────────
 // 3. KOMPONEN (nanti dipindah ke widgets/)
-// ─────────────────────────────────────────────
 
-/// Sapaan + avatar inisial di kanan
+///  profile
 class _Header extends StatelessWidget {
   final String name;
   const _Header({required this.name});
@@ -215,7 +219,10 @@ class _MoodCard extends StatelessWidget {
             ),
           ),
           IconButton(
-            onPressed: () {}, // TODO: edit / hapus
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => AddEditMoodPage(entry: entry)),
+            ),
             icon: const Icon(Icons.more_vert),
           ),
         ],
@@ -224,7 +231,7 @@ class _MoodCard extends StatelessWidget {
   }
 }
 
-/// Kotak berwarna dengan wajah. Sementara placeholder (tanpa asset).
+/// Kotak berwarna pake wajah. Sementara placeholder (tanpa asset).
 class _MoodIcon extends StatelessWidget {
   final Mood mood;
   const _MoodIcon({required this.mood});
