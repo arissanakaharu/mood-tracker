@@ -1,4 +1,6 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:mood_tracker_app/pages/add_edit_mood_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -7,116 +9,235 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
+      title: 'Mood Tracker',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
+        textTheme: GoogleFonts.poppinsTextTheme(),
       ),
-      home: const MyHomePage(title: 'Test Test'),
+      home: const HomePage(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+// 1. MODEL (nanti dipindah ke models/mood_entry.dart)
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
+enum Mood { bersemangat, tenang, senang, sedih, cemas, marah }
 
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
+extension MoodX on Mood {
+  String get label => switch (this) {
+        Mood.bersemangat => 'Bersemangat',
+        Mood.tenang => 'Tenang',
+        Mood.senang => 'Senang',
+        Mood.sedih => 'Sedih',
+        Mood.cemas => 'Cemas',
+        Mood.marah => 'Marah'
+      };
 
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  Color get color => switch (this) {
+        Mood.bersemangat => const Color(0xFFF083B5),
+        Mood.tenang => const Color(0xFF77CDC4),
+        Mood.senang => const Color(0xFFF6C25B),
+        Mood.sedih => const Color(0xFF6C9BEA),
+        Mood.cemas => const Color(0xFFB59DEB),
+        Mood.marah => const Color(0xFFEB7566)
+      };
+  String get asset => 'assets/images/moods/$name.png';    
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class MoodEntry {
+  final Mood mood;
+  final DateTime time;
+  final String note;
+  const MoodEntry({required this.mood, required this.time, required this.note});
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
+String get timeLabel =>
+    '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+}
+
+// 2. HOME PAGE
+
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    final now = DateTime.now();
+final yesterdayDate = now.subtract(const Duration(days: 1));
+
+DateTime at(DateTime day, int h, int m) =>
+    DateTime(day.year, day.month, day.day, h, m);
+
+bool sameDay(DateTime a, DateTime b) =>
+    a.year == b.year && a.month == b.month && a.day == b.day;
+
+// TODO: ganti dengan data asli (state management / database)
+final entries = [
+  MoodEntry(mood: Mood.bersemangat, time: at(now, 14, 20), note: 'Dapat kabar baik dari klien'),
+  MoodEntry(mood: Mood.tenang, time: at(now, 11, 0), note: 'Meditasi pagi terasa menenangkan'),
+  MoodEntry(mood: Mood.senang, time: at(now, 8, 30), note: 'Pagi yang cerah dan menyenangkan'),
+  MoodEntry(mood: Mood.sedih, time: at(yesterdayDate, 20, 15), note: 'Kangen rumah tiba-tiba'),
+  MoodEntry(mood: Mood.cemas, time: at(yesterdayDate, 9, 0), note: 'Deadline bikin deg-degan'),
+];
+
+final today = entries.where((e) => sameDay(e.time, now)).toList();
+final yesterday = entries.where((e) => sameDay(e.time, yesterdayDate)).toList();
+
     return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+      backgroundColor: const Color(0xFFF9FAFB),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Navigator.push(
+          context, 
+          MaterialPageRoute(builder: (_)=> const AddEditMoodPage()),
+        ),
+        backgroundColor: const Color(0xFF4B36B8),
+        shape: const CircleBorder(),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: .center,
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           children: [
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
+            const _Header(name: 'Hanun'),
+            const SizedBox(height: 24),
+            const _StreakChip(days: 5),
+            const SizedBox(height: 28),
+            const _SectionTitle('Hari Ini'),
+            ...today.map((e) => _MoodCard(entry: e)),
+            const SizedBox(height: 24),
+            const _SectionTitle('Kemarin'),
+            ...yesterday.map((e) => _MoodCard(entry: e)),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+    );
+  }
+}
+
+// 3. KOMPONEN (nanti dipindah ke widgets/)
+
+///  profile
+class _Header extends StatelessWidget {
+  final String name;
+  const _Header({required this.name});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Halo, $name 👋', 
+              style: const TextStyle(fontSize: 24,fontWeight: FontWeight.w600,color: Color(0xFF1A1A2E),
+              )
+              ),  
+              const SizedBox(height: 4),
+              const Text('Bagaimana perasaanmu hari ini?',style: TextStyle(fontSize: 16, color: Color(0xFF6B7280))),
+            ],
+          ),
+        ),
+        CircleAvatar(
+          radius: 26,
+          backgroundColor: const Color(0xFFE5DEF7),
+          child: Text(name[0]), // TODO: style ungu
+        ),
+      ],
+    );
+  }
+}
+
+/// Pill "5 hari berturut-turut mencatat mood"
+class _StreakChip extends StatelessWidget {
+  final int days;
+  const _StreakChip({required this.days});
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: const Color(0xFFE5DEF7),
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Text('🔥 $days hari berturut-turut mencatat mood'),
       ),
     );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  final String text;
+  const _SectionTitle(this.text);
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Text(text), // TODO: style semi-bold
+      );
+}
+
+/// Satu kartu mood: [ikon] [judul + jam · catatan] [menu ⋮]
+class _MoodCard extends StatelessWidget {
+  final MoodEntry entry;
+  const _MoodCard({required this.entry});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: const [
+          BoxShadow(color: Color(0x14000000), blurRadius: 12, offset: Offset(0, 4)),
+        ],
+      ),
+      child: Row(
+        children: [
+          _MoodIcon(mood: entry.mood),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(entry.mood.label),
+                const SizedBox(height: 4),
+                Text(
+                  '${entry.time.hour} · ${entry.note}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => AddEditMoodPage(entry: entry)),
+            ),
+            icon: const Icon(Icons.more_vert),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Kotak berwarna pake wajah. Sementara placeholder (tanpa asset).
+class _MoodIcon extends StatelessWidget {
+  final Mood mood;
+  const _MoodIcon({required this.mood});
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.asset(mood.asset, width: 70, height: 70);
   }
 }
