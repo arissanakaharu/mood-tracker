@@ -61,9 +61,21 @@ class _AddEditMoodPageState extends State<AddEditMoodPage> {
   }
 
   void _save() {
-    // TODO (27 Nov): simpan / update data lewat CRUD
-    Navigator.pop(context);
-  }
+    final old = widget.entry;
+  final now = DateTime.now();
+  final base = old?.time ?? now;
+  final time = DateTime(_date.year, _date.month, _date.day, base.hour, base.minute);
+
+  Navigator.pop(
+    context,
+    MoodEntry(
+      id: old?.id ?? now.microsecondsSinceEpoch.toString(),
+      mood: _selectedMood!,
+      time: time,
+      note: _noteController.text.trim(),
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
