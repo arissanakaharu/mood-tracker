@@ -1,6 +1,6 @@
 # Mood Tracker
 
-A daily mood tracking app built with Flutter. Users can log how they feel each day, browse their history, and edit or delete entries. Data is stored on the device, so it is still there after the app is closed.
+A daily mood tracking app built with Flutter. Users can log how they feel each day, browse their history, and edit or delete moods.
 
 ## Features
 
